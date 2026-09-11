@@ -31,18 +31,13 @@ export function BottomNav() {
             }`}
           >
             <span
-              className={`flex size-8 items-center justify-center rounded-xl transition-colors ${
-                isActive ? 'bg-primary/12' : ''
-              }`}
+              className={`flex size-8 items-center justify-center rounded-xl transition-colors `}
             >
               <Icon size={20} strokeWidth={isActive ? 2.2 : 1.7} />
             </span>
             <span className={`text-[9px] ${isActive ? 'font-bold' : 'font-medium'}`}>
               {label}
             </span>
-            {isActive && (
-              <span className="absolute -top-2.5 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-primary" />
-            )}
           </Link>
         )
       })}

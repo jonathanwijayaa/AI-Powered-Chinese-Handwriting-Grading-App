@@ -17,7 +17,7 @@ interface StatusPillProps {
 export function StatusPill({ tone, children }: StatusPillProps) {
   return (
     <span
-      className={`shrink-0 rounded-sm border px-2 py-0.5 text-[9px] font-semibold tracking-wide ${toneClasses[tone]}`}
+      className={`shrink-0 rounded-sm border px-2 py-1 text-[9px] font-semibold tracking-wide ${toneClasses[tone]}`}
     >
       {children}
     </span>

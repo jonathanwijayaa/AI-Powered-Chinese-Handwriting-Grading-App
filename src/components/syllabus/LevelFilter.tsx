@@ -16,7 +16,7 @@ export function LevelFilter({ active, onChange }: LevelFilterProps) {
             key={level}
             aria-pressed={isActive}
             onClick={() => onChange?.(level)}
-            className={`flex h-8 w-12 items-center justify-center rounded-full text-xs font-bold transition-all active:scale-95 ${
+            className={`flex h-8 w-12 items-center justify-center rounded-full text-xs font-semibold transition-all active:scale-95 ${
               isActive
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'bg-card text-muted-foreground ring-1 ring-border hover:text-foreground'

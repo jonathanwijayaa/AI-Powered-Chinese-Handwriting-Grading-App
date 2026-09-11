@@ -40,7 +40,7 @@ export function StatCard({
               : 'text-accent'
           }`}
         >
-          <Icon size={18} strokeWidth={2} />
+          <Icon size={16} strokeWidth={2.5} />
         </span>
       </div>
 

@@ -30,12 +30,12 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
         {lesson.words.map(([word, pronunciation]) => (
           <div
             key={word}
-            className="group flex w-[28%] shrink-0 flex-col items-center justify-center rounded-xl bg-[#f8f6f0] py-3.5 text-center transition-colors hover:bg-primary/8"
+            className="group flex w-[24%] shrink-0 flex-col items-center justify-center rounded-xl bg-[#f8f6f0] py-3.5 text-center transition-colors hover:bg-primary/8"
           >
-            <span className="text-xl font-bold leading-none text-foreground transition-colors group-hover:text-primary">
+            <span className="text-lg font-semibold leading-none text-foreground transition-colors group-hover:text-primary">
               {word}
             </span>
-            <span className="mt-2 text-[10px] font-medium text-muted-foreground/80">
+            <span className="mt-2 text-[8px] font-medium text-muted-foreground/80">
               {pronunciation}
             </span>
           </div>
@@ -45,10 +45,10 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
       {/* Footer link */}
       <a
         href="#worksheet"
-        className="mt-3 flex items-center justify-between border-t border-border pt-3 text-[10px] font-semibold text-primary transition-opacity hover:opacity-70"
+        className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs font-medium text-primary transition-opacity hover:opacity-70"
       >
         <span className="flex items-center gap-1.5">
-          <Printer size={14} strokeWidth={2} />
+          <Printer size={14} strokeWidth={3} />
           Print A4 Worksheet (PDF)
         </span>
         <ChevronRight size={14} className="opacity-60" />

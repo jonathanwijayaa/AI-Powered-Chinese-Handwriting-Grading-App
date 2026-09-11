@@ -60,7 +60,7 @@ export default function SyllabusPage() {
               <h1 id="syllabus-heading" className="text-sm font-semibold tracking-tight">
                 MOE {activeLevel.replace('P', 'Primary ')} Syllabus
               </h1>
-              <span className="rounded-full px-2.5 py-1 text-[9px] font-medium text-muted-foreground">
+              <span className="rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground">
                 24 Lessons Total
               </span>
             </div>

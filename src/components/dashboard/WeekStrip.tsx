@@ -10,7 +10,7 @@ interface WeekStripProps {
 
 export function WeekStrip({ days }: WeekStripProps) {
   return (
-    <div className="mt-3 flex items-center justify-between rounded-lg bg-card px-4 py-5 shadow-sm ring-1 ring-border/30">
+    <div className="mt-3 flex items-center justify-between rounded-lg bg-card px-4 py-4.5 shadow-sm ring-1 ring-border/30">
       {days.map((item) => (
         <div
           key={item.day}
