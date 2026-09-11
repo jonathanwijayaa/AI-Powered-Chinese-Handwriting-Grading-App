@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Lexend, Poppins } from 'next/font/google'
+import { RegisterSW } from '@/components/pwa/RegisterSW'
 
 import './globals.css'
 
@@ -40,6 +41,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={`${lexend.variable} ${poppins.variable}`}>
       <body className="font-poppins antialiased">
         {children}
+        <RegisterSW />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
