@@ -8,7 +8,7 @@ interface LevelFilterProps {
 
 export function LevelFilter({ active, onChange }: LevelFilterProps) {
   return (
-    <div className="mt-4 flex items-center gap-1.5">
+    <div className="mt-4 flex items-center justify-between gap-0.5">
       {ALL_LEVELS.map((level) => {
         const isActive = level === active
         return (
@@ -16,10 +16,10 @@ export function LevelFilter({ active, onChange }: LevelFilterProps) {
             key={level}
             aria-pressed={isActive}
             onClick={() => onChange?.(level)}
-            className={`h-8 flex-1 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${
+            className={`flex h-8 w-12 items-center justify-center rounded-full text-xs font-bold transition-all active:scale-95 ${
               isActive
-                ? 'bg-primary text-primary-foreground shadow-[0_3px_10px_rgba(51,103,94,0.25)]'
-                : 'bg-card text-muted-foreground ring-1 ring-border hover:text-foreground hover:ring-primary/30'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-card text-muted-foreground ring-1 ring-border hover:text-foreground'
             }`}
           >
             {level}

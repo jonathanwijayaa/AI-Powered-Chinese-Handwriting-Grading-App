@@ -57,11 +57,11 @@ export default function SyllabusPage() {
 
           <section className="mt-5" aria-labelledby="syllabus-heading">
             <div className="flex items-center justify-between">
-              <h1 id="syllabus-heading" className="text-sm font-bold tracking-tight">
-                MOE {activeLevel} Syllabus
+              <h1 id="syllabus-heading" className="text-sm font-semibold tracking-tight">
+                MOE {activeLevel.replace('P', 'Primary ')} Syllabus
               </h1>
-              <span className="rounded-full bg-muted px-2.5 py-1 text-[9px] font-semibold text-muted-foreground">
-                24 Lessons
+              <span className="rounded-full px-2.5 py-1 text-[9px] font-medium text-muted-foreground">
+                24 Lessons Total
               </span>
             </div>
             <div className="mt-3 flex flex-col gap-3">

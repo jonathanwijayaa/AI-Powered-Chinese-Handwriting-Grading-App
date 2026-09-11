@@ -18,7 +18,7 @@ export function UpcomingCard({ week, event }: UpcomingCardProps) {
       aria-labelledby="upcoming-heading"
     >
       <div className="flex items-center justify-between">
-        <h2 id="upcoming-heading" className="text-sm font-bold tracking-tight">
+        <h2 id="upcoming-heading" className="text-sm font-semibold tracking-tight">
           Upcoming Ting Xie
         </h2>
         <a
@@ -32,13 +32,13 @@ export function UpcomingCard({ week, event }: UpcomingCardProps) {
       <WeekStrip days={week} />
 
       {/* Event notification card */}
-      <div className="mt-3 flex items-center gap-3 rounded-lg border border-primary/20 bg-gradient-to-r from-primary/8 to-primary/4 p-3.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+      <div className="mt-3 flex items-center gap-3 rounded-lg border border-primary bg-primary/8 p-3.5">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground text-primary">
           <Bell size={16} strokeWidth={2} />
         </div>
         <div className="min-w-0">
           <p className="truncate text-xs font-bold">{event.title}</p>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">
+          <p className="mt-0.5 text-[10px] text-primary">
             {event.subtitle}
           </p>
         </div>

@@ -2,7 +2,7 @@ type Tone = 'pending' | 'completed' | 'revision'
 
 const toneClasses: Record<Tone, string> = {
   pending:
-    'border-amber-200 bg-amber-50 text-amber-700',
+    'border-amber-200 bg-amber-50 text-amber-600',
   completed:
     'border-primary/20 bg-primary/8 text-primary',
   revision:
@@ -17,7 +17,7 @@ interface StatusPillProps {
 export function StatusPill({ tone, children }: StatusPillProps) {
   return (
     <span
-      className={`shrink-0 rounded-full border px-2.5 py-1 text-[9px] font-bold tracking-wide ${toneClasses[tone]}`}
+      className={`shrink-0 rounded-sm border px-2 py-0.5 text-[9px] font-semibold tracking-wide ${toneClasses[tone]}`}
     >
       {children}
     </span>

@@ -36,11 +36,11 @@ export function StatCard({
         <span
           className={`flex size-7 items-center justify-center rounded-lg ${
             subVariant === 'primary'
-              ? 'bg-primary/10 text-primary'
-              : 'bg-accent/15 text-accent'
+              ? 'text-primary'
+              : 'text-accent'
           }`}
         >
-          <Icon size={15} strokeWidth={2} />
+          <Icon size={18} strokeWidth={2} />
         </span>
       </div>
 

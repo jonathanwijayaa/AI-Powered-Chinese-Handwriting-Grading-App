@@ -14,7 +14,7 @@ export function PageHeader({
   studentLevel = 'Primary 2',
 }: PageHeaderProps) {
   return (
-    <header className="pt-8 px-4 pb-4 animate-fade-up flex items-center justify-between">
+    <header className="pt-8 px-4  animate-fade-up flex items-center justify-between">
       {/* Avatar + greeting */}
       <div className="flex items-center gap-3">
         <div className="relative flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 font-serif text-base font-semibold text-primary ring-2 ring-primary/10">
@@ -41,10 +41,10 @@ export function PageHeader({
           <ChevronDown size={12} className="text-primary/60" />
         </button>
         <button
-          className="flex size-8 items-center justify-center rounded-full bg-card text-foreground shadow-sm ring-1 ring-border transition-all hover:text-primary active:scale-90"
+          className="flex size-8 items-center justify-center rounded-full text-foreground transition-all hover:text-primary active:scale-90"
           aria-label="Notifications"
         >
-          <Bell size={17} strokeWidth={1.8} />
+          <Bell size={21} strokeWidth={1.8} />
         </button>
       </div>
     </header>

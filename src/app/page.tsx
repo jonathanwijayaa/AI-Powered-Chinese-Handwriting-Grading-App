@@ -1,6 +1,6 @@
 'use client'
 
-import { Camera, Check, Library } from 'lucide-react'
+import { Camera, CircleCheckBig , BookOpen } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { CreditCard } from '@/components/dashboard/CreditCard'
@@ -39,7 +39,7 @@ export default function DashboardPage() {
               value="82.4%"
               sub="+3.1% this month"
               subVariant="primary"
-              icon={Check}
+              icon={CircleCheckBig}
               animDelay="120ms"
             />
             <StatCard
@@ -47,7 +47,7 @@ export default function DashboardPage() {
               value="48 Characters"
               sub="8 lists covered"
               subVariant="muted"
-              icon={Library}
+              icon={BookOpen}
               animDelay="180ms"
             />
           </section>
@@ -58,7 +58,7 @@ export default function DashboardPage() {
           <div className="animate-fade-up animate-fade-up-4 mt-8 flex justify-center">
             <button
               id="scan-grade-btn"
-              className="flex items-center gap-2.5 rounded-full bg-primary px-6 py-3.5 text-[13px] font-bold text-primary-foreground shadow-[0_8px_24px_rgba(51,103,94,0.28)] transition-all hover:shadow-[0_10px_30px_rgba(51,103,94,0.38)] hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+              className="flex items-center gap-2.5 rounded-full bg-primary px-6 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-[0_8px_24px_rgba(51,103,94,0.28)] transition-all hover:shadow-[0_10px_30px_rgba(51,103,94,0.38)] hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
             >
               <Camera size={18} strokeWidth={2} />
               Scan &amp; Grade Worksheet
