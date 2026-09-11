@@ -19,12 +19,12 @@ export function ScoreCard({
       <div className="relative flex size-20 shrink-0 items-center justify-center rounded-full border-4 border-rose-500 text-base font-bold text-rose-500">
         {percentage}%
       </div>
-      <div>
-        <h2 className="text-xl font-bold text-gray-900">
+      <div className="flex flex-col justify-center space-y-1.5">
+        <h2 className="text-xl font-bold leading-tight text-gray-900">
           Score: {score}/{maxScore}
         </h2>
         <p className="text-xs text-muted-foreground">{date}</p>
-        <p className="mt-1 text-xs font-semibold text-rose-500">
+        <p className="text-xs font-semibold text-rose-500">
           {missedCount} characters missed
         </p>
       </div>
