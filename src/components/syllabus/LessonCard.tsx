@@ -1,7 +1,11 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { ChevronRight, Printer } from 'lucide-react'
 import { StatusPill } from './StatusPill'
 
 export interface Lesson {
+  id?: string
   week: string
   title: string
   status: string
@@ -10,8 +14,22 @@ export interface Lesson {
 }
 
 export function LessonCard({ lesson }: { lesson: Lesson }) {
+  const router = useRouter()
+  const lessonId = lesson.id || 'week-4'
+
+  const handleGoToFeedback = () => {
+    router.push(`/feedback/${lessonId}`)
+  }
+
+  const handlePrint = (e: React.MouseEvent) => {
+    e.stopPropagation()
+  }
+
   return (
-    <article className="animate-pop-in rounded-xl bg-card p-4 shadow-[0_4px_18px_rgba(50,80,70,0.07)] ring-1 ring-border/50 transition-shadow hover:shadow-[0_6px_24px_rgba(50,80,70,0.11)]">
+    <article
+      onClick={handleGoToFeedback}
+      className="group cursor-pointer rounded-xl bg-card p-4 shadow-[0_4px_18px_rgba(50,80,70,0.07)] ring-1 ring-border/50 transition-all hover:shadow-[0_6px_24px_rgba(50,80,70,0.11)] active:scale-[0.99]"
+    >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -30,29 +48,31 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
         {lesson.words.map(([word, pronunciation]) => (
           <div
             key={word}
-            className="group flex w-[24%] shrink-0 flex-col items-center justify-center rounded-xl bg-[#f8f6f0] py-3.5 text-center transition-colors hover:bg-primary/8"
+            className="flex w-[24%] shrink-0 flex-col items-center justify-center rounded-xl bg-[#f8f6f0] py-3.5 text-center transition-colors group-hover:bg-[#f1eee4]"
           >
-            <span className="text-lg font-semibold leading-none text-foreground transition-colors group-hover:text-primary">
+            <span className="text-lg font-semibold leading-none text-foreground">
               {word}
             </span>
-            <span className="mt-2 text-[8px] font-medium text-muted-foreground/80">
+            <span className="mt-2 text-[10px] font-medium text-muted-foreground/80">
               {pronunciation}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Footer link */}
-      <a
-        href="#worksheet"
-        className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs font-medium text-primary transition-opacity hover:opacity-70"
-      >
-        <span className="flex items-center gap-1.5">
-          <Printer size={14} strokeWidth={3} />
-          Print A4 Worksheet (PDF)
-        </span>
-        <ChevronRight size={14} className="opacity-60" />
-      </a>
+      <div className="mt-3 border-t border-border pt-3">
+        <button
+          type="button"
+          onClick={handlePrint}
+          className="flex w-full items-center justify-between text-xs font-medium text-primary transition-opacity hover:opacity-70"
+        >
+          <span className="flex items-center gap-1.5">
+            <Printer size={14} strokeWidth={2.5} />
+            Print A4 Worksheet (PDF)
+          </span>
+          <ChevronRight size={14} className="opacity-60" />
+        </button>
+      </div>
     </article>
   )
 }
