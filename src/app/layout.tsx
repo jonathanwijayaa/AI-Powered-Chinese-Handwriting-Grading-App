@@ -1,7 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Lexend, Poppins } from 'next/font/google'
-import { useEffect } from 'react'
+
 import './globals.css'
 
 const lexend = Lexend({
@@ -36,11 +36,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  useEffect(() => {
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker.register('/sw.js')
-    }
-  }, [])
   return (
     <html lang="en" suppressHydrationWarning className={`${lexend.variable} ${poppins.variable}`}>
       <body className="font-poppins antialiased">
