@@ -12,4 +12,6 @@ const nextConfig = {
   turbopack: {},
 }
 
-export default withPWA(nextConfig)
+export default function config(phase, args) {
+  return withPWA(nextConfig)
+}
