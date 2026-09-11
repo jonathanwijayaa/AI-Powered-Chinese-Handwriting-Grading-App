@@ -30,7 +30,7 @@ export function CreditCard({ remaining, total, expiryDate }: CreditCardProps) {
             </span>
           </p>
         </div>
-        <button className="shrink-0 rounded-md bg-primary px-4 py-2 text-[11px] font-semibold text-primary-foreground shadow-[0_4px_12px_rgba(51,103,94,0.25)] transition-all hover:shadow-[0_6px_18px_rgba(51,103,94,0.35)] active:scale-95">
+        <button className="shrink-0 rounded-md bg-primary px-4 py-2 text-[11px] font-medium text-primary-foreground shadow-[0_4px_12px_rgba(51,103,94,0.25)] transition-all hover:shadow-[0_6px_18px_rgba(51,103,94,0.35)] active:scale-95">
           Top Up
         </button>
       </div>

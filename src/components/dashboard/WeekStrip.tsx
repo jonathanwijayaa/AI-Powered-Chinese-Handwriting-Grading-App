@@ -10,25 +10,31 @@ interface WeekStripProps {
 
 export function WeekStrip({ days }: WeekStripProps) {
   return (
-    <div className="mt-3 flex items-center justify-between rounded-lg bg-card px-2 py-2 shadow-sm ring-1 ring-border/50">
+    <div className="mt-3 flex items-center justify-between rounded-lg bg-card px-4 py-5 shadow-sm ring-1 ring-border/30">
       {days.map((item) => (
         <div
           key={item.day}
           aria-current={item.active ? 'date' : undefined}
-          className={`flex h-[60px] w-10 flex-col items-center justify-center gap-1 rounded-md transition-all ${
+          className={`flex h-[76px] w-[46px] flex-col items-center justify-center rounded-lg transition-all ${
             item.active
-              ? 'bg-primary/10 text-primary shadow-[0_4px_12px_rgba(51,103,94,0.3)] border border-primary'
+              ? 'bg-primary/10 text-primary shadow-sm border border-primary'
               : 'text-foreground hover:bg-muted/60'
           }`}
         >
           <span
-            className={`text-[9px] font-medium ${item.active ? 'text-primary/80' : 'text-foreground/80'}`}
+            className={`text-[11px] font-medium ${item.active ? 'text-primary/80' : 'text-muted-foreground'}`}
           >
             {item.day}
           </span>
-          <span className="text-[13px] font-bold leading-none">{item.date}</span>
-          {item.active && (
-            <span className="size-1 rounded-full bg-primary" />
+          
+          <span className="mt-1.5 text-lg font-semibold leading-none">
+            {item.date}
+          </span>
+
+          {item.active ? (
+            <span className="mt-1.5 size-1 rounded-full bg-primary" />
+          ) : (
+            <span className="mt-1.5 size-1" /> 
           )}
         </div>
       ))}
