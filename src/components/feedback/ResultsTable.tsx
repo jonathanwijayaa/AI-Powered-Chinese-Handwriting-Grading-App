@@ -18,18 +18,17 @@ export function ResultsTable({ dates, data }: ResultsTableProps) {
 
       <div className="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xs">
         {/* Scroll Horizontal Container */}
-        <div className="overflow-x-auto scrollbar-none">
-          <table className="w-full min-w-[480px] border-collapse text-left text-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-xs">
             <thead>
               <tr className="border-b border-gray-200 bg-[#f0f5f3]">
-                {/* Column Sticky Character */}
-                <th className="sticky left-0 z-10 w-28 min-w-[100px] border-r border-gray-200 bg-[#f0f5f3] p-3 font-semibold text-gray-600">
+                <th className="sticky left-0 z-10 w-24 border-r border-gray-200 bg-[#f0f5f3] p-3 font-semibold text-gray-600">
                   Character
                 </th>
                 {dates.map((d, index) => (
                   <th
-                    key={d}
-                    className={`w-16 min-w-[64px] p-3 text-center font-semibold text-gray-600 ${
+                    key={index}
+                    className={`p-3 text-center font-semibold text-gray-600 min-w-[70px] ${
                       index < dates.length - 1 ? 'border-r border-gray-200' : ''
                     }`}
                   >
@@ -45,19 +44,15 @@ export function ResultsTable({ dates, data }: ResultsTableProps) {
 
                 return (
                   <tr key={idx} className={bgClass}>
-                    {/* Character Column (Sticky saat di-scroll) */}
                     <td className={`sticky left-0 z-10 border-r border-gray-200 p-3 ${bgClass}`}>
-                      <div className="text-base font-bold text-gray-900">
-                        {row.char}
-                      </div>
+                      <div className="text-base font-bold text-gray-900">{row.char}</div>
                       <div className="text-[10px] text-gray-400">{row.pinyin}</div>
                     </td>
 
-                    {/* History Icons */}
                     {row.historyData.map((status, i) => (
                       <td
                         key={i}
-                        className={`p-3 text-center vertical-middle ${
+                        className={`p-3 text-center align-middle ${
                           i < row.historyData.length - 1 ? 'border-r border-gray-200' : ''
                         }`}
                       >

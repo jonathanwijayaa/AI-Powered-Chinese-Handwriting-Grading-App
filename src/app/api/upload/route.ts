@@ -77,19 +77,21 @@ export async function POST(request: Request) {
 
     const aiEvaluation = await evaluateWorksheetWithGemini(fileBuffer, mimeType)
 
-    const charRecords = aiEvaluation.results.map((item) => ({
-      submission_id: submission.id,
-      word: item.word,
-      is_correct: item.is_correct,
-      feedback: item.feedback || null,
-    }))
+    if (aiEvaluation.results && aiEvaluation.results.length > 0) {
+      const charRecords = aiEvaluation.results.map((item) => ({
+        submission_id: submission.id,
+        word: item.word,
+        is_correct: item.is_correct,
+        feedback: item.feedback || null,
+      }))
 
-    const { error: charInsertError } = await supabase
-      .from('character_results')
-      .insert(charRecords)
+      const { error: charInsertError } = await supabase
+        .from('character_results')
+        .insert(charRecords)
 
-    if (charInsertError) {
-      console.error('DATABASE ERROR (character_results):', charInsertError)
+      if (charInsertError) {
+        console.error('CHARACTER RESULTS INSERT ERROR:', charInsertError)
+      }
     }
 
     const { data: updatedSubmissions, error: updateError } = await supabase
