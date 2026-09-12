@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI, Type } from '@google/genai'
 
 export interface EvaluationItem {
   word: string
@@ -24,38 +24,71 @@ export async function evaluateWorksheetWithGemini(
     throw new Error('GEMINI_API_KEY environment variable is not defined.')
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-3.5-flash',
-    generationConfig: { responseMimeType: 'application/json' },
-  })
-
+  const ai = new GoogleGenAI({ apiKey })
   const base64Image = fileBuffer.toString('base64')
-  const prompt = `Compare the handwriting in this Tian Zige grid against the expected spelling list ${JSON.stringify(
-    EXPECTED_WORDS
-  )}. Return a JSON array detailing which words were written correctly or incorrectly with schema: [{"word": string, "is_correct": boolean, "feedback": string}].`
 
-  const result = await model.generateContent([
-    prompt,
-    {
-      inlineData: {
-        mimeType: mimeType || 'image/jpeg',
-        data: base64Image,
+  const prompt = `Analyze this Tian Zige handwritten Chinese worksheet. 
+Compare against expected words: ["操场", "礼堂", "老师"].
+Return JSON array for all 3 words evaluating if written correctly.`
+
+  const aiResponse = await ai.models.generateContent({
+    model: 'gemini-2.0-flash',
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType: mimeType || 'image/jpeg',
+              data: base64Image,
+            },
+          },
+        ],
+      },
+    ],
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            word: { type: Type.STRING },
+            is_correct: { type: Type.BOOLEAN },
+            feedback: { type: Type.STRING },
+          },
+          required: ['word', 'is_correct'],
+        },
       },
     },
-  ])
+  })
 
-  const rawText = result.response.text() || '[]'
-  const evalResults: EvaluationItem[] = JSON.parse(rawText)
+  const rawText = aiResponse.text || '[]'
+  let parsed: any[] = []
+  try {
+    parsed = JSON.parse(rawText)
+  } catch (e) {
+    console.error('Failed to parse AI JSON:', e)
+  }
 
-  const correctCount = evalResults.filter((r) => r.is_correct).length
+  const results: EvaluationItem[] = EXPECTED_WORDS.map((word) => {
+    const match = parsed.find((p) => p.word === word || p.word?.includes(word))
+    return {
+      word,
+      is_correct: match ? Boolean(match.is_correct) : false,
+      feedback: match?.feedback || '',
+    }
+  })
+
+  const correctCount = results.filter((r) => r.is_correct).length
   const totalWords = EXPECTED_WORDS.length
-  const percentage = Number(((correctCount / totalWords) * 100).toFixed(2))
+  const percentage = Math.round((correctCount / totalWords) * 100)
 
   return {
     correctCount,
     totalWords,
     percentage,
-    results: evalResults,
+    results,
   }
 }

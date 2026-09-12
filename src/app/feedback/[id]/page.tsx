@@ -12,19 +12,13 @@ interface PageProps {
 }
 
 export default async function FeedbackPage({ params }: PageProps) {
-  // 1. Await params secara aman di Next.js 15
   const resolvedParams = await params
   const id = resolvedParams?.id
 
   if (!id) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-3">
-          <p className="text-rose-500 font-semibold">Invalid Submission ID</p>
-          <Link href="/scan" className="text-xs text-primary underline">
-            Return to Scanner
-          </Link>
-        </div>
+        <p className="text-rose-500 font-semibold">Invalid Submission ID</p>
       </main>
     )
   }
@@ -33,7 +27,7 @@ export default async function FeedbackPage({ params }: PageProps) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-  // 2. Fetch submission data
+  // 1. Fetch Current Submission
   const { data: currentSubmission, error: subError } = await supabase
     .from('submissions')
     .select('*, character_results(*)')
@@ -44,40 +38,38 @@ export default async function FeedbackPage({ params }: PageProps) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-3 bg-white p-6 rounded-2xl shadow-sm border border-border">
-          <h2 className="text-lg font-bold text-gray-900">Submission Processing</h2>
-          <p className="text-xs text-muted-foreground">
-            Data submission sedang diproses atau belum ditemukan.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/scan"
-              className="inline-block rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
-            >
-              Back to Scanner
-            </Link>
-          </div>
+          <h2 className="text-lg font-bold text-gray-900">Submission Not Found</h2>
+          <Link href="/scan" className="text-xs text-primary underline">
+            Back to Scanner
+          </Link>
         </div>
       </main>
     )
   }
 
-  // 3. Fetch history records untuk Matrix Table
+  // 2. Fetch All Student History Submissions
   const { data: historyData } = await supabase
     .from('submissions')
     .select('id, created_at, character_results(word, is_correct)')
     .eq('student_id', currentSubmission.student_id || 'student_lucas_p2')
     .order('created_at', { ascending: true })
 
-  // Format tanggal untuk kolom header tabel
-  const dates: string[] =
-    historyData && Array.isArray(historyData) && historyData.length > 0
-      ? historyData.map((h: any) =>
-          new Date(h.created_at).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })
-        )
-      : ['8 Oct', '10 Oct', '12 Oct', '14 Oct', '16 Oct']
+  const hasHistory = Array.isArray(historyData) && historyData.length > 0
+
+  // Dynamic Dates Header
+  const dates: string[] = hasHistory
+    ? historyData.map((h: any) =>
+        new Date(h.created_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        })
+      )
+    : [
+        new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+      ]
 
   const expectedWords = [
     { char: '操场', pinyin: 'cāo chǎng' },
@@ -85,23 +77,24 @@ export default async function FeedbackPage({ params }: PageProps) {
     { char: '老师', pinyin: 'lǎo shī' },
   ]
 
-  // Map matriks riwayat centang/silang
+  // Dynamic Matrix Mapping from Real Supabase Data
   const matrixData: CharacterResult[] = expectedWords.map((item) => ({
     char: item.char,
     pinyin: item.pinyin,
-    historyData:
-      Array.isArray(historyData) && historyData.length > 0
-        ? historyData.map((sub: any) => {
-            const match = sub.character_results?.find(
-              (cr: any) => cr.word === item.char
-            )
-            return match?.is_correct ? 'correct' : 'incorrect'
-          })
-        : ['correct', 'correct'],
+    historyData: hasHistory
+      ? historyData.map((sub: any) => {
+          const match = sub.character_results?.find(
+            (cr: any) => cr.word === item.char
+          )
+          return match?.is_correct ? 'correct' : 'incorrect'
+        })
+      : (currentSubmission.character_results?.map((cr: any) =>
+          cr.word === item.char && cr.is_correct ? 'correct' : 'incorrect'
+        ) || ['incorrect']),
   }))
 
-  const missedCount =
-    currentSubmission.character_results?.filter((cr: any) => !cr.is_correct).length || 0
+  const charResults = currentSubmission.character_results || []
+  const missedCount = charResults.filter((cr: any) => !cr.is_correct).length
 
   const formattedDate = currentSubmission.created_at
     ? `Graded on ${new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
@@ -120,7 +113,7 @@ export default async function FeedbackPage({ params }: PageProps) {
               TEST FEEDBACK
             </span>
             <h1 className="font-serif text-xl font-bold text-foreground">
-              Tian Zige Assessment
+              Week 4 Syllabus Test
             </h1>
           </div>
           <span
@@ -136,9 +129,9 @@ export default async function FeedbackPage({ params }: PageProps) {
 
         {/* 1. Score Overview Header */}
         <ScoreCard
-          score={currentSubmission.total_score || 0}
-          maxScore={currentSubmission.max_score || 3}
-          percentage={currentSubmission.percentage || 0}
+          score={currentSubmission.total_score ?? 0}
+          maxScore={currentSubmission.max_score ?? 3}
+          percentage={currentSubmission.percentage ?? 0}
           date={formattedDate}
           missedCount={missedCount}
         />
