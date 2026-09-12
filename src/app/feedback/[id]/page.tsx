@@ -38,16 +38,42 @@ export default async function FeedbackPage({ params }: PageProps) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-3 bg-white p-6 rounded-2xl shadow-sm border border-border">
-          <h2 className="text-lg font-bold text-gray-900">Submission Not Found</h2>
-          <Link href="/scan" className="text-xs text-primary underline">
-            Back to Scanner
-          </Link>
+          <h2 className="text-lg font-bold text-gray-900">Submission Processing</h2>
+          <p className="text-xs text-muted-foreground">
+            Data submission sedang diproses atau belum ditemukan.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/scan"
+              className="inline-block rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground"
+            >
+              Back to Scanner
+            </Link>
+          </div>
         </div>
       </main>
     )
   }
 
-// 3. Fetch History Submissions beserta character_results
+  // 2. Fetch Data Vocabulary Dinamis dari Tabel 'lessons'
+  const { data: lessonData } = await supabase
+    .from('lessons')
+    .select('word_lists')
+    .eq('moe_level', 'P2')
+    .limit(1)
+    .maybeSingle()
+
+  // Fallback jika database lesson belum terisi
+  const expectedWords: { char: string; pinyin: string }[] =
+    lessonData?.word_lists && Array.isArray(lessonData.word_lists)
+      ? lessonData.word_lists
+      : [
+          { char: '操场', pinyin: 'cāo chǎng' },
+          { char: '礼堂', pinyin: 'lǐ táng' },
+          { char: '老师', pinyin: 'lǎo shī' },
+        ]
+
+  // 3. Fetch History Submissions untuk Matrix Table
   const { data: historyData } = await supabase
     .from('submissions')
     .select('id, created_at, character_results(character_name, status)')
@@ -56,22 +82,14 @@ export default async function FeedbackPage({ params }: PageProps) {
 
   const hasHistory = Array.isArray(historyData) && historyData.length > 0
 
-  // Format Header Tanggal (jika pada tanggal yang sama, tambahkan urutan/jam agar tidak kosong & unik)
+  // Format Header Tanggal Bersih (Tanpa Jam)
   const dates: string[] = hasHistory
-    ? historyData.map((h: any, idx: number) => {
-        const dateObj = new Date(h.created_at)
-        const dayStr = dateObj.toLocaleDateString('en-US', {
+    ? historyData.map((h: any) =>
+        new Date(h.created_at).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
         })
-        // Jika ada multiple submission di hari yang sama, tampilkan waktu (misal: Sep 12, 18:16)
-        const timeStr = dateObj.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        })
-        return `${dayStr} (${timeStr})`
-      })
+      )
     : [
         new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
           month: 'short',
@@ -79,13 +97,7 @@ export default async function FeedbackPage({ params }: PageProps) {
         }),
       ]
 
-  const expectedWords = [
-    { char: '操场', pinyin: 'cāo chǎng' },
-    { char: '礼堂', pinyin: 'lǐ táng' },
-    { char: '老师', pinyin: 'lǎo shī' },
-  ]
-
-  // Mapping Matriks Centang/Silang Berdasarkan Submission Real dari Database
+  // Map Data Matrix dari Daftar Kata Dinamis Lessons
   const matrixData: CharacterResult[] = expectedWords.map((item) => ({
     char: item.char,
     pinyin: item.pinyin,
@@ -96,25 +108,25 @@ export default async function FeedbackPage({ params }: PageProps) {
           )
           return match?.status === 'correct' ? 'correct' : 'incorrect'
         })
-      : [
-          currentSubmission.character_results?.find(
-            (cr: any) => cr.character_name === item.char
-          )?.status === 'correct'
+      : (currentSubmission.character_results?.map((cr: any) =>
+          cr.character_name === item.char && cr.status === 'correct'
             ? 'correct'
-            : 'incorrect',
-        ],
+            : 'incorrect'
+        ) || ['incorrect']),
   }))
 
   const charResults = currentSubmission.character_results || []
-  const missedCount = charResults.filter(
-    (cr: any) => cr.status !== 'correct'
-  ).length
+  const missedCount = charResults.filter((cr: any) => cr.status !== 'correct').length
+
   const actualScore =
     charResults.length > 0
       ? charResults.filter((cr: any) => cr.status === 'correct').length
       : currentSubmission.total_score ?? 0
 
-  const actualPercentage = Math.round((actualScore / (currentSubmission.max_score || 3)) * 100)
+  const actualPercentage = Math.round(
+    (actualScore / (currentSubmission.max_score || expectedWords.length)) * 100
+  )
+
   const formattedDate = currentSubmission.created_at
     ? `Graded on ${new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
         month: 'short',
@@ -149,7 +161,7 @@ export default async function FeedbackPage({ params }: PageProps) {
         {/* 1. Score Overview Header */}
         <ScoreCard
           score={actualScore}
-          maxScore={currentSubmission.max_score || 3}
+          maxScore={currentSubmission.max_score || expectedWords.length}
           percentage={actualPercentage}
           date={formattedDate}
           missedCount={missedCount}
