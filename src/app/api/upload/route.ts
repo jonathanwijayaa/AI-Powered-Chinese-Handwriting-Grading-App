@@ -18,8 +18,10 @@ export async function POST(request: Request) {
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`
     const filePath = `scans/${fileName}`
 
-    const fileBuffer = await file.arrayBuffer()
-    const { data: storageData, error: storageError } = await supabase.storage
+    const arrayBuffer = await file.arrayBuffer()
+    const fileBuffer = Buffer.from(arrayBuffer)
+
+    const { error: storageError } = await supabase.storage
       .from('worksheets')
       .upload(filePath, fileBuffer, {
         contentType: file.type || 'image/jpeg',
