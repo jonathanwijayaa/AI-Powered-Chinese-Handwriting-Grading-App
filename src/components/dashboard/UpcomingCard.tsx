@@ -31,7 +31,6 @@ export function UpcomingCard({ week, event }: UpcomingCardProps) {
 
       <WeekStrip days={week} />
 
-      {/* Event notification card */}
       <div className="mt-3 flex items-center gap-3 rounded-lg border border-primary bg-[#f0f5f3] p-3.5">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-[#1b4332] shadow-xs">
           <Bell size={16} strokeWidth={2} />

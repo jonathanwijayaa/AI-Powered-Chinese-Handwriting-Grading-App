@@ -24,7 +24,7 @@ export function ScoreCard({
     : 'text-rose-500 font-semibold'
 
   return (
-    <div className="mt-4 flex items-center gap-4 rounded-3xl bg-white p-5 shadow-xs ring-1 ring-border/20">
+    <div className="mt-4 flex items-center gap-4 rounded-2xl bg-white p-5 shadow-xs ring-1 ring-border/20">
       {/* Ring Chart Circle */}
       <div
         className={`relative flex size-20 shrink-0 items-center justify-center rounded-full border-4 text-base font-bold ${circleColorClass}`}

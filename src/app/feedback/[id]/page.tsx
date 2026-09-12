@@ -96,15 +96,15 @@ export default async function FeedbackPage({ params }: PageProps) {
   // Format Header Tanggal Bersih (Tanpa Jam)
   const dates: string[] = hasHistory
     ? historyData.map((h: any) =>
-        new Date(h.created_at).toLocaleDateString('en-US', {
-          month: 'short',
+        new Date(h.created_at).toLocaleDateString('en-GB', {
           day: 'numeric',
+          month: 'short',
         })
       )
     : [
-        new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
-          month: 'short',
+        new Date(currentSubmission.created_at).toLocaleDateString('en-GB', {
           day: 'numeric',
+          month: 'short',
         }),
       ]
 
@@ -139,9 +139,13 @@ export default async function FeedbackPage({ params }: PageProps) {
   )
 
   const formattedDate = currentSubmission.created_at
-    ? `Graded on ${new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
-        month: 'short',
+    ? `Graded on ${new Date(currentSubmission.created_at).toLocaleDateString('en-GB', {
         day: 'numeric',
+        month: 'short',
+      })}, ${new Date(currentSubmission.created_at).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
       })}`
     : 'Graded today'
 

@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Lexend, Poppins } from 'next/font/google'
+import { Lexend, Poppins, Inter, Roboto } from 'next/font/google'
 import { RegisterSW } from '@/components/pwa/RegisterSW'
 
 import './globals.css'
@@ -9,13 +9,20 @@ const lexend = Lexend({
   subsets: ['latin'],
   variable: '--font-lexend',
 })
+const roboto = Roboto({
+  subsets: ['latin'],
+  variable: '--font-roboto',
+})
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-poppins',
 })
-
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
 export const metadata: Metadata = {
   title: 'Learning Dashboard',
   description: 'A focused learning dashboard for Primary Chinese Handwriting & Syllabus.',
@@ -30,7 +37,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  viewportFit: 'cover', // Syarat PWA agar background warna menyatu mulus ke status bar HP
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -39,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${lexend.variable} ${poppins.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${lexend.variable} ${poppins.variable} ${roboto.variable}`}>
       <body className="font-poppins antialiased min-h-screen bg-[#f8f6f1]">
         {children}
         <RegisterSW />

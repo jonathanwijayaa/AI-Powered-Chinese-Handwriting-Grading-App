@@ -57,15 +57,13 @@ export function ResultsTable({ dates, data }: ResultsTableProps) {
                         }`}
                       >
                         {status === 'correct' ? (
-                          <Check
-                            className="inline size-4 text-emerald-600"
-                            strokeWidth={2.5}
-                          />
+                          <span className="inline size-4 text-emerald-600">
+                            ✔
+                          </span>
                         ) : (
-                          <X
-                            className="inline size-4 text-rose-500"
-                            strokeWidth={2.5}
-                          />
+                          <span className="inline size-4 text-rose-500">
+                            ✘
+                          </span>
                         )}
                       </td>
                     ))}
