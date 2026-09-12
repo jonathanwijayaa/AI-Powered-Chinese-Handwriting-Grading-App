@@ -20,23 +20,39 @@ export function WorksheetScanner({ onCapture, onClose }: WorksheetScannerProps) 
   useEffect(() => {
     async function startCamera() {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
+        const devices = await navigator.mediaDevices.enumerateDevices()
+        const videoDevices = devices.filter((d) => d.kind === 'videoinput')
+        const mainRearCamera = videoDevices.find((device) => {
+          const label = device.label.toLowerCase()
+          return (
+            (label.includes('back') || label.includes('rear') || label.includes('environment')) &&
+            !label.includes('ultra') &&
+            !label.includes('wide 0.5') &&
+            !label.includes('0.5x')
+          )
+        })
+        const constraints: MediaStreamConstraints = {
           video: {
-            facingMode: { exact: 'environment' },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            deviceId: mainRearCamera ? { exact: mainRearCamera.deviceId } : undefined,
+            facingMode: mainRearCamera ? undefined : { ideal: 'environment' },
+            width: { ideal: 3840, min: 1920 }, 
+            height: { ideal: 2160, min: 1080 },
+            frameRate: { ideal: 30 },
           },
           audio: false,
-        })
-
+        }
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
         setStream(mediaStream)
+
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream
         }
-      } catch {
+      } catch (err)
+      {
+        console.warn('High-res/Main camera stream fallback:', err)
         try {
           const fallbackStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment' },
+            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
             audio: false,
           })
           setStream(fallbackStream)
@@ -72,30 +88,55 @@ export function WorksheetScanner({ onCapture, onClose }: WorksheetScannerProps) 
     }
   }
 
-  const handleCapture = () => {
+  const handleCapture = async() => {
     if (!videoRef.current || isCapturing) return
-
     setIsCapturing(true)
+
     const video = videoRef.current
-    const canvas = document.createElement('canvas')
-    canvas.width = video.videoWidth || 1280
-    canvas.height = video.videoHeight || 720
+    const track = stream?.getVideoTracks()[0]
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
+    try {
+      if (typeof window !== 'undefined' && 'ImageCapture' in window && track) {
+        try {
+          const imageCapture = new (window as any).ImageCapture(track)
+          const blob = await imageCapture.takePhoto()
           onCapture(blob)
+          setIsCapturing(false)
+          return
+        } catch (e) {
+          console.warn('ImageCapture takePhoto failed, fallback to Canvas snap:', e)
         }
-        setIsCapturing(false)
-      },
-      'image/jpeg',
-      0.92
-    )
+      }
+      const settings = track?.getSettings()
+      const rawWidth = settings?.width || video.videoWidth || 1920
+      const rawHeight = settings?.height || video.videoHeight || 1080
+
+      const canvas = document.createElement('canvas')
+      canvas.width = rawWidth
+      canvas.height = rawHeight
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        // Render dengan kualitas image smoothing maksimal
+        ctx.imageSmoothingEnabled = true
+        ctx.imageSmoothingQuality = 'high'
+        ctx.drawImage(video, 0, 0, rawWidth, rawHeight)
+
+        // Export ke High Quality JPEG Blob (0.95 = 95% quality)
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              onCapture(blob)
+            }
+            setIsCapturing(false)
+          },
+          'image/jpeg',
+          0.95
+        )
+      }
+    } catch (err) {
+      console.error('Error snapping frame:', err)
+      setIsCapturing(false)
+    }
   }
 
   return (
