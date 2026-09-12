@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function POST(request: Request) {
   try {
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer()
     const fileBuffer = Buffer.from(arrayBuffer)
 
+    // Upload ke bucket worksheets
     const { error: storageError } = await supabase.storage
       .from('worksheets')
       .upload(fileName, fileBuffer, {
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
       })
 
     if (storageError) {
-      console.error('STORAGE ERROR:', storageError)
+      console.error('STORAGE ERROR HP:', storageError)
       return NextResponse.json(
         { error: `Storage Error: ${storageError.message}` },
         { status: 500 }
@@ -51,6 +53,7 @@ export async function POST(request: Request) {
       .getPublicUrl(fileName)
 
     const imageUrl = publicUrlData.publicUrl
+
     const { data: submission, error: dbError } = await supabase
       .from('submissions')
       .insert([
@@ -65,18 +68,25 @@ export async function POST(request: Request) {
       .single()
 
     if (dbError) {
-      console.error('DATABASE ERROR:', dbError)
+      console.error('DATABASE ERROR HP:', dbError)
       return NextResponse.json(
         { error: `Database Error: ${dbError.message}` },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({
-      message: 'Worksheet uploaded successfully',
-      submissionId: submission.id,
-      imageUrl: submission.image_url,
-    })
+    return NextResponse.json(
+      {
+        message: 'Worksheet uploaded successfully',
+        submissionId: submission.id,
+        imageUrl: submission.image_url,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, max-age=0',
+        },
+      }
+    )
   } catch (err: any) {
     console.error('API CRASH LOG:', err)
     return NextResponse.json(
