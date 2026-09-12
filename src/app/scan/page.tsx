@@ -23,11 +23,14 @@ export default function ScanPage() {
 
       const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Upload failed')
+      if (res.ok && data.submission?.id) {
+        router.push(`/feedback/${data.submission.id}`)
+      } else if (res.ok && data.submissionId) {
+        router.push(`/feedback/${data.submissionId}`)
+      } else {
+        alert(`Upload failed: ${data.error}`)
       }
 
-      router.push(`/feedback/${data.submissionId}`)
     } catch (err: any) {
       console.error('Upload Error:', err)
       alert(`Upload failed: ${err.message}`)
