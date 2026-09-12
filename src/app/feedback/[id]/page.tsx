@@ -47,23 +47,31 @@ export default async function FeedbackPage({ params }: PageProps) {
     )
   }
 
-  // 2. Fetch All Student History Submissions
+// 3. Fetch History Submissions beserta character_results
   const { data: historyData } = await supabase
     .from('submissions')
-    .select('id, created_at, character_results(word, is_correct)')
+    .select('id, created_at, character_results(character_name, status)')
     .eq('student_id', currentSubmission.student_id || 'student_lucas_p2')
     .order('created_at', { ascending: true })
 
   const hasHistory = Array.isArray(historyData) && historyData.length > 0
 
-  // Dynamic Dates Header
+  // Format Header Tanggal (jika pada tanggal yang sama, tambahkan urutan/jam agar tidak kosong & unik)
   const dates: string[] = hasHistory
-    ? historyData.map((h: any) =>
-        new Date(h.created_at).toLocaleDateString('en-US', {
+    ? historyData.map((h: any, idx: number) => {
+        const dateObj = new Date(h.created_at)
+        const dayStr = dateObj.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
         })
-      )
+        // Jika ada multiple submission di hari yang sama, tampilkan waktu (misal: Sep 12, 18:16)
+        const timeStr = dateObj.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+        return `${dayStr} (${timeStr})`
+      })
     : [
         new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
           month: 'short',
@@ -77,7 +85,8 @@ export default async function FeedbackPage({ params }: PageProps) {
     { char: '老师', pinyin: 'lǎo shī' },
   ]
 
-    const matrixData: CharacterResult[] = expectedWords.map((item) => ({
+  // Mapping Matriks Centang/Silang Berdasarkan Submission Real dari Database
+  const matrixData: CharacterResult[] = expectedWords.map((item) => ({
     char: item.char,
     pinyin: item.pinyin,
     historyData: hasHistory
@@ -85,14 +94,15 @@ export default async function FeedbackPage({ params }: PageProps) {
           const match = sub.character_results?.find(
             (cr: any) => cr.character_name === item.char
           )
-
           return match?.status === 'correct' ? 'correct' : 'incorrect'
         })
-      : (currentSubmission.character_results?.map((cr: any) =>
-          cr.character_name === item.char && cr.status === 'correct'
+      : [
+          currentSubmission.character_results?.find(
+            (cr: any) => cr.character_name === item.char
+          )?.status === 'correct'
             ? 'correct'
-            : 'incorrect'
-        ) || ['incorrect']),
+            : 'incorrect',
+        ],
   }))
 
   const charResults = currentSubmission.character_results || []

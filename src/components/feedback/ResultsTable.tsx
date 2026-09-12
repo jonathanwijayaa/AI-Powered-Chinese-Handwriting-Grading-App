@@ -26,8 +26,8 @@ export function ResultsTable({ dates, data }: ResultsTableProps) {
                 </th>
                 {dates.map((d, index) => (
                   <th
-                    key={index}
-                    className={`p-3 text-center font-semibold text-gray-600 min-w-[64px] ${
+                    key={`${d}-${index}`}
+                    className={`p-3 text-center font-semibold text-gray-600 min-w-[75px] ${
                       index < dates.length - 1 ? 'border-r border-gray-200' : ''
                     }`}
                   >
