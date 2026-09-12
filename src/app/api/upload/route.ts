@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
-        { error: 'Supabase environment variables missing.' },
+        { error: 'Supabase environment variables are missing.' },
         { status: 500 }
       )
     }
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const fileBuffer = Buffer.from(arrayBuffer)
     const mimeType = file.type || 'image/jpeg'
 
-    // 1. Upload ke Supabase Storage
+    // 1. Upload foto langsung ke Supabase Storage Bucket ('worksheets')
     const { error: storageError } = await supabase.storage
       .from('worksheets')
       .upload(fileName, fileBuffer, {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     const imageUrl = publicUrlData.publicUrl
 
-    // 2. Simpan Submission Record awal (Status: Pending)
+    // 2. Simpan record pending submission awal ke tabel 'submissions'
     const { data: submission, error: dbError } = await supabase
       .from('submissions')
       .insert([
@@ -61,22 +61,22 @@ export async function POST(request: Request) {
           image_url: imageUrl,
           status: 'pending',
           max_score: EXPECTED_WORDS.length,
+          total_score: 0,
+          percentage: 0,
         },
       ])
       .select()
       .single()
 
-    if (dbError) {
+    if (dbError || !submission) {
       return NextResponse.json(
-        { error: `Database Error: ${dbError.message}` },
+        { error: `Database Error (Pending Submission): ${dbError?.message}` },
         { status: 500 }
       )
     }
 
-    // 3. Jalankan AI Pipeline (Panggilan ke Modul Terpisah)
     const aiEvaluation = await evaluateWorksheetWithGemini(fileBuffer, mimeType)
 
-    // 4. Catat detail tiap karakter di tabel character_results
     const charRecords = aiEvaluation.results.map((item) => ({
       submission_id: submission.id,
       word: item.word,
@@ -84,9 +84,14 @@ export async function POST(request: Request) {
       feedback: item.feedback || null,
     }))
 
-    await supabase.from('character_results').insert(charRecords)
+    const { error: charInsertError } = await supabase
+      .from('character_results')
+      .insert(charRecords)
 
-    // 5. Update Submission Record menjadi Completed
+    if (charInsertError) {
+      console.error('DATABASE ERROR (character_results):', charInsertError)
+    }
+
     const { data: updatedSubmissions, error: updateError } = await supabase
       .from('submissions')
       .update({
@@ -98,21 +103,25 @@ export async function POST(request: Request) {
       .select()
 
     if (updateError) {
-      return NextResponse.json(
-        { error: `Submission Update Error: ${updateError.message}` },
-        { status: 500 }
-      )
+      console.error('DATABASE ERROR (submission update):', updateError)
     }
 
-    const updatedSubmission = updatedSubmissions?.[0] || submission
+    const finalSubmission = updatedSubmissions?.[0] || {
+      ...submission,
+      total_score: aiEvaluation.correctCount,
+      percentage: aiEvaluation.percentage,
+      status: 'completed',
+    }
 
+    // 6. Kirim payload balik ke Front End untuk Red Pen Overlay dan dynamic score header
     return NextResponse.json({
       message: 'Worksheet evaluated successfully',
-      submission: updatedSubmission,
+      submissionId: finalSubmission.id,
+      submission: finalSubmission,
       results: aiEvaluation.results,
     })
   } catch (err: any) {
-    console.error('SERVER UPLOAD ROUTE ERROR:', err)
+    console.error('API ROUTE CRASH:', err)
     return NextResponse.json(
       { error: err.message || 'Internal server error' },
       { status: 500 }
