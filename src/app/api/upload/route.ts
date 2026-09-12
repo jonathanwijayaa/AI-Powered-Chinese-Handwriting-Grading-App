@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const fileBuffer = Buffer.from(arrayBuffer)
     const mimeType = file.type || 'image/jpeg'
 
-    // 1. Upload foto langsung ke Supabase Storage Bucket ('worksheets')
+    // 1. Upload ke Storage
     const { error: storageError } = await supabase.storage
       .from('worksheets')
       .upload(fileName, fileBuffer, {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     const imageUrl = publicUrlData.publicUrl
 
-    // 2. Simpan record pending submission awal ke tabel 'submissions'
+    // 2. Simpan record pending submission awal
     const { data: submission, error: dbError } = await supabase
       .from('submissions')
       .insert([
@@ -75,8 +75,10 @@ export async function POST(request: Request) {
       )
     }
 
+    // 3. Evaluasi AI
     const aiEvaluation = await evaluateWorksheetWithGemini(fileBuffer, mimeType)
 
+    // 4. Catat ke tabel character_results (RETURN ERROR JIKA GAGAL)
     if (aiEvaluation.results && aiEvaluation.results.length > 0) {
       const charRecords = aiEvaluation.results.map((item) => ({
         submission_id: submission.id,
@@ -91,9 +93,14 @@ export async function POST(request: Request) {
 
       if (charInsertError) {
         console.error('CHARACTER RESULTS INSERT ERROR:', charInsertError)
+        return NextResponse.json(
+          { error: `Character Results Insert Error: ${charInsertError.message}` },
+          { status: 500 }
+        )
       }
     }
 
+    // 5. Update Submission Record
     const { data: updatedSubmissions, error: updateError } = await supabase
       .from('submissions')
       .update({
@@ -115,7 +122,6 @@ export async function POST(request: Request) {
       status: 'completed',
     }
 
-    // 6. Kirim payload balik ke Front End untuk Red Pen Overlay dan dynamic score header
     return NextResponse.json({
       message: 'Worksheet evaluated successfully',
       submissionId: finalSubmission.id,
