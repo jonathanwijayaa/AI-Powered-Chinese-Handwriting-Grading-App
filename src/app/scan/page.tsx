@@ -56,8 +56,8 @@ export default function ScanPage() {
       {isUploading && (
         <div className="fixed inset-0 z-60 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md text-white">
           <RefreshCw className="size-10 animate-spin text-emerald-400 mb-4" />
-          <p className="text-sm font-semibold tracking-wide">Evaluating Tian Zige Worksheet...</p>
-          <p className="text-xs text-white/60 mt-1">Analyzing strokes with Gemini AI Vision</p>
+          <p className="text-sm font-semibold tracking-wide">Evaluating Worksheet...</p>
+          <p className="text-xs text-white/60 mt-1">Analyzing strokes with AI</p>
         </div>
       )}
 
