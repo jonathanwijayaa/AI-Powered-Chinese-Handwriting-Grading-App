@@ -1,47 +1,45 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { evaluateWorksheetWithGemini, EXPECTED_WORDS } from '@/lib/ai-pipeline'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
 export async function POST(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
-        { error: 'Environment variables Supabase belum diset.' },
+        { error: 'Supabase environment variables missing.' },
         { status: 500 }
       )
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
+    const supabase = createClient(supabaseUrl, supabaseKey)
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const studentId = (formData.get('studentId') as string) || 'student_lucas_p2'
 
     if (!file) {
-      return NextResponse.json({ error: 'File gambar tidak ditemukan' }, { status: 400 })
+      return NextResponse.json({ error: 'No image file provided' }, { status: 400 })
     }
 
     const fileExt = file.name.split('.').pop() || 'jpg'
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`
-
     const arrayBuffer = await file.arrayBuffer()
     const fileBuffer = Buffer.from(arrayBuffer)
+    const mimeType = file.type || 'image/jpeg'
 
-    // Upload ke bucket worksheets
+    // 1. Upload ke Supabase Storage
     const { error: storageError } = await supabase.storage
       .from('worksheets')
       .upload(fileName, fileBuffer, {
-        contentType: file.type || 'image/jpeg',
+        contentType: mimeType,
         upsert: true,
       })
 
     if (storageError) {
-      console.error('STORAGE ERROR HP:', storageError)
       return NextResponse.json(
         { error: `Storage Error: ${storageError.message}` },
         { status: 500 }
@@ -54,41 +52,66 @@ export async function POST(request: Request) {
 
     const imageUrl = publicUrlData.publicUrl
 
+    // 2. Simpan Submission Record awal (Status: Pending)
     const { data: submission, error: dbError } = await supabase
       .from('submissions')
       .insert([
         {
           student_id: studentId,
           image_url: imageUrl,
-          total_score: 0,
           status: 'pending',
+          max_score: EXPECTED_WORDS.length,
         },
       ])
       .select()
       .single()
 
     if (dbError) {
-      console.error('DATABASE ERROR HP:', dbError)
       return NextResponse.json(
         { error: `Database Error: ${dbError.message}` },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(
-      {
-        message: 'Worksheet uploaded successfully',
-        submissionId: submission.id,
-        imageUrl: submission.image_url,
-      },
-      {
-        headers: {
-          'Cache-Control': 'no-store, max-age=0',
-        },
-      }
-    )
+    // 3. Jalankan AI Pipeline (Panggilan ke Modul Terpisah)
+    const aiEvaluation = await evaluateWorksheetWithGemini(fileBuffer, mimeType)
+
+    // 4. Catat detail tiap karakter di tabel character_results
+    const charRecords = aiEvaluation.results.map((item) => ({
+      submission_id: submission.id,
+      word: item.word,
+      is_correct: item.is_correct,
+      feedback: item.feedback || null,
+    }))
+
+    await supabase.from('character_results').insert(charRecords)
+
+    // 5. Update Submission Record menjadi Completed
+    const { data: updatedSubmission, error: updateError } = await supabase
+      .from('submissions')
+      .update({
+        total_score: aiEvaluation.correctCount,
+        percentage: aiEvaluation.percentage,
+        status: 'completed',
+      })
+      .eq('id', submission.id)
+      .select()
+      .single()
+
+    if (updateError) {
+      return NextResponse.json(
+        { error: `Submission Update Error: ${updateError.message}` },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      message: 'Worksheet evaluated successfully',
+      submission: updatedSubmission,
+      results: aiEvaluation.results,
+    })
   } catch (err: any) {
-    console.error('API CRASH LOG:', err)
+    console.error('SERVER UPLOAD ROUTE ERROR:', err)
     return NextResponse.json(
       { error: err.message || 'Internal server error' },
       { status: 500 }

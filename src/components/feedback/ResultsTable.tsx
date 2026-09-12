@@ -3,7 +3,7 @@ import { Check, X } from 'lucide-react'
 export interface CharacterResult {
   char: string
   pinyin: string
-  history: ('correct' | 'incorrect')[]
+  historyData: ('correct' | 'incorrect')[]
 }
 
 interface ResultsTableProps {
@@ -54,11 +54,11 @@ export function ResultsTable({ dates, data }: ResultsTableProps) {
                     </td>
 
                     {/* History Icons */}
-                    {row.history.map((status, i) => (
+                    {row.historyData.map((status, i) => (
                       <td
                         key={i}
                         className={`p-3 text-center vertical-middle ${
-                          i < row.history.length - 1 ? 'border-r border-gray-200' : ''
+                          i < row.historyData.length - 1 ? 'border-r border-gray-200' : ''
                         }`}
                       >
                         {status === 'correct' ? (
