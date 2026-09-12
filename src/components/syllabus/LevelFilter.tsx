@@ -8,7 +8,7 @@ interface LevelFilterProps {
 
 export function LevelFilter({ active, onChange }: LevelFilterProps) {
   return (
-    <div className="mt-4 flex items-center justify-between gap-0.5">
+    <div className="mt-4 grid grid-cols-6 gap-1.5 w-full">
       {ALL_LEVELS.map((level) => {
         const isActive = level === active
         return (
