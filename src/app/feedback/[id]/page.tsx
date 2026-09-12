@@ -22,10 +22,10 @@ const dates = ['8 Oct', '10 Oct', '12 Oct', '14 Oct', '16 Oct']
 export default function FeedbackPage() {
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-[430px] bg-background p-5 pb-24">
+      <div className="mx-auto max-w-[430px] bg-background px-4 pt-3 pb-24">
         {/* Header Info */}
-        <div className="flex items-center justify-between pt-8">
-          <div>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <span className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
               TEST FEEDBACK
             </span>
@@ -33,10 +33,10 @@ export default function FeedbackPage() {
               Week 4 Syllabus Test
             </h1>
           </div>
-          <span className="rounded-md border border-rose-200 bg-rose-100 px-3 py-1 text-[11px] font-medium text-rose-600">
+          <span className="shrink-0 rounded-md border border-rose-200 bg-rose-100 px-2.5 py-1 text-[11px] font-medium text-rose-600">
             Needs Revision
           </span>
-        </div>
+        </div>  
 
         {/* Main UI Elements */}
         <ScoreCard

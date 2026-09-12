@@ -15,13 +15,13 @@ const poppins = Poppins({
   subsets: ['latin'],
   variable: '--font-poppins',
 })
+
 export const metadata: Metadata = {
-  title: 'Lucas Learning Dashboard',
-  description: 'A focused learning dashboard for Lucas — Primary 2.',
+  title: 'Learning Dashboard',
+  description: 'A focused learning dashboard for Primary Chinese Handwriting & Syllabus.',
   generator: 'v0.app',
   icons: {},
 }
-
 
 export const viewport: Viewport = {
   colorScheme: 'light',
@@ -30,6 +30,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: 'cover', // Syarat PWA agar background warna menyatu mulus ke status bar HP
 }
 
 export default function RootLayout({
@@ -39,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${lexend.variable} ${poppins.variable}`}>
-      <body className="font-poppins antialiased">
+      <body className="font-poppins antialiased min-h-screen bg-[#f8f6f1]">
         {children}
         <RegisterSW />
         {process.env.NODE_ENV === 'production' && <Analytics />}

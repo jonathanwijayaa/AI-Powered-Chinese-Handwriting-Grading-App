@@ -50,7 +50,7 @@ export default function SyllabusPage() {
   return (
     <main id="syllabus" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-background pb-24">
-        <div className="px-5 pb-6 pt-5">
+        <div className="px-4 pb-6 pt-3">
           <PageHeader />
 
           <LevelFilter active={activeLevel} onChange={setActiveLevel} />

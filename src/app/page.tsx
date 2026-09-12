@@ -25,7 +25,7 @@ export default function DashboardPage() {
   return (
     <main id="dashboard" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-background pb-24">
-        <div className="px-5 pt-5">
+        <div className="px-4 pt-3">
           <PageHeader />
 
           <CreditCard remaining={12} total={20} expiryDate="30 Nov 2026" />
