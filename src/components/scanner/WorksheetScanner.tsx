@@ -88,7 +88,7 @@ export function WorksheetScanner({ onCapture, onClose }: WorksheetScannerProps) 
     }
   }
 
-  const handleCapture = async() => {
+  const handleCapture = () => {
     if (!videoRef.current || isCapturing) return
     setIsCapturing(true)
 
@@ -96,17 +96,6 @@ export function WorksheetScanner({ onCapture, onClose }: WorksheetScannerProps) 
     const track = stream?.getVideoTracks()[0]
 
     try {
-      if (typeof window !== 'undefined' && 'ImageCapture' in window && track) {
-        try {
-          const imageCapture = new (window as any).ImageCapture(track)
-          const blob = await imageCapture.takePhoto()
-          onCapture(blob)
-          setIsCapturing(false)
-          return
-        } catch (e) {
-          console.warn('ImageCapture takePhoto failed, fallback to Canvas snap:', e)
-        }
-      }
       const settings = track?.getSettings()
       const rawWidth = settings?.width || video.videoWidth || 1920
       const rawHeight = settings?.height || video.videoHeight || 1080
@@ -114,24 +103,25 @@ export function WorksheetScanner({ onCapture, onClose }: WorksheetScannerProps) 
       const canvas = document.createElement('canvas')
       canvas.width = rawWidth
       canvas.height = rawHeight
+
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        // Render dengan kualitas image smoothing maksimal
         ctx.imageSmoothingEnabled = true
         ctx.imageSmoothingQuality = 'high'
         ctx.drawImage(video, 0, 0, rawWidth, rawHeight)
 
-        // Export ke High Quality JPEG Blob (0.95 = 95% quality)
         canvas.toBlob(
-          (blob) => {
+          async (blob) => {
             if (blob) {
-              onCapture(blob)
+              await onCapture(blob)
             }
             setIsCapturing(false)
           },
           'image/jpeg',
           0.95
         )
+      } else {
+        setIsCapturing(false)
       }
     } catch (err) {
       console.error('Error snapping frame:', err)
