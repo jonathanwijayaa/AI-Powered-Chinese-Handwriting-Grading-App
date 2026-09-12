@@ -1,8 +1,9 @@
 import { GoogleGenAI, Type } from '@google/genai'
 
 export interface EvaluationItem {
-  word: string
-  is_correct: boolean
+  character_name: string
+  pinyin: string
+  status: 'correct' | 'incorrect'
   feedback?: string
 }
 
@@ -13,7 +14,12 @@ export interface EvaluationResult {
   results: EvaluationItem[]
 }
 
-export const EXPECTED_WORDS = ['操场', '礼堂', '老师']
+// Perbaikan 1: Ubah EXPECTED_WORDS menjadi array of objects lengkap dengan Pinyin
+export const EXPECTED_WORDS = [
+  { char: '操场', pinyin: 'cāo chǎng' },
+  { char: '礼堂', pinyin: 'lǐ táng' },
+  { char: '老师', pinyin: 'lǎo shī' },
+]
 
 export async function evaluateWorksheetWithGemini(
   fileBuffer: Buffer,
@@ -27,9 +33,12 @@ export async function evaluateWorksheetWithGemini(
   const ai = new GoogleGenAI({ apiKey })
   const base64Image = fileBuffer.toString('base64')
 
+  // Perbaikan 2: Mengambil array nama karakter untuk dimasukkan ke prompt
+  const wordListStr = JSON.stringify(EXPECTED_WORDS.map((w) => w.char))
+
   const prompt = `Analyze this Tian Zige handwritten Chinese worksheet. 
-Compare against expected words: ["操场", "礼堂", "老师"].
-Return JSON array for all 3 words evaluating if written correctly.`
+Compare against expected words: ${wordListStr}.
+Return a JSON array for all 3 words evaluating if written correctly or incorrectly.`
 
   const aiResponse = await ai.models.generateContent({
     model: 'gemini-3.6-flash',
@@ -55,10 +64,10 @@ Return JSON array for all 3 words evaluating if written correctly.`
           type: Type.OBJECT,
           properties: {
             word: { type: Type.STRING },
-            is_correct: { type: Type.BOOLEAN },
+            status: { type: Type.STRING, enum: ['correct', 'incorrect'] },
             feedback: { type: Type.STRING },
           },
-          required: ['word', 'is_correct'],
+          required: ['word', 'status'],
         },
       },
     },
@@ -72,16 +81,20 @@ Return JSON array for all 3 words evaluating if written correctly.`
     console.error('Failed to parse AI JSON:', e)
   }
 
-  const results: EvaluationItem[] = EXPECTED_WORDS.map((word) => {
-    const match = parsed.find((p) => p.word === word || p.word?.includes(word))
+  // Perbaikan 3: item.char dan item.pinyin sekarang valid sepenuhnya
+  const results: EvaluationItem[] = EXPECTED_WORDS.map((item) => {
+    const match = parsed.find(
+      (p) => p.word === item.char || p.word?.includes(item.char)
+    )
     return {
-      word,
-      is_correct: match ? Boolean(match.is_correct) : false,
+      character_name: item.char,
+      pinyin: item.pinyin,
+      status: match?.status === 'correct' ? 'correct' : 'incorrect',
       feedback: match?.feedback || '',
     }
   })
 
-  const correctCount = results.filter((r) => r.is_correct).length
+  const correctCount = results.filter((r) => r.status === 'correct').length
   const totalWords = EXPECTED_WORDS.length
   const percentage = Math.round((correctCount / totalWords) * 100)
 

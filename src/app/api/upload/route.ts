@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    const supabaseKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json(
@@ -75,16 +76,16 @@ export async function POST(request: Request) {
       )
     }
 
-    // 3. Evaluasi AI
+    // 3. Evaluasi AI Pipeline
     const aiEvaluation = await evaluateWorksheetWithGemini(fileBuffer, mimeType)
 
-    // 4. Catat ke tabel character_results (RETURN ERROR JIKA GAGAL)
+    // 4. Catat ke tabel character_results (sesuai schema: character_name, pinyin, status)
     if (aiEvaluation.results && aiEvaluation.results.length > 0) {
       const charRecords = aiEvaluation.results.map((item) => ({
         submission_id: submission.id,
-        word: item.word,
-        is_correct: item.is_correct,
-        feedback: item.feedback || null,
+        character_name: item.character_name,
+        pinyin: item.pinyin,
+        status: item.status, // 'correct' | 'incorrect'
       }))
 
       const { error: charInsertError } = await supabase
