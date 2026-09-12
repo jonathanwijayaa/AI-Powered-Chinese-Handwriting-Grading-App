@@ -32,7 +32,7 @@ Compare against expected words: ["操场", "礼堂", "老师"].
 Return JSON array for all 3 words evaluating if written correctly.`
 
   const aiResponse = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-3.6-flash',
     contents: [
       {
         role: 'user',
