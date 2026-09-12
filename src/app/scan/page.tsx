@@ -3,14 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { WorksheetScanner } from '@/components/scanner/WorksheetScanner'
-import { RefreshCw, ArrowRight } from 'lucide-react'
-
-interface CharacterResultItem {
-  character_name: string
-  pinyin: string
-  status: 'correct' | 'incorrect'
-  feedback?: string
-}
+import { RedPenOverlay, CharacterResultItem } from '@/components/scanner/RedPenOverlay'
+import { RefreshCw } from 'lucide-react'
 
 export default function ScanPage() {
   const router = useRouter()
@@ -40,7 +34,6 @@ export default function ScanPage() {
         const imgUrl = data.submission?.image_url
         const results = data.results || []
 
-        // Simpan data untuk memicu tampilan Red Pen Overlay
         setOverlayData({
           submissionId: subId,
           imageUrl: imgUrl,
@@ -57,11 +50,8 @@ export default function ScanPage() {
     }
   }
 
-  const incorrectItems = overlayData?.results.filter((r) => r.status === 'incorrect') || []
-  const correctCount = overlayData?.results.filter((r) => r.status === 'correct').length || 0
-
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black select-none">
+    <div className="relative min-h-screen w-full overflow-hidden bg-black select-none">
       {/* 1. State Loading Evaluasi AI */}
       {isUploading && (
         <div className="fixed inset-0 z-60 flex flex-col items-center justify-center bg-black/80 backdrop-blur-md text-white">
@@ -71,71 +61,15 @@ export default function ScanPage() {
         </div>
       )}
 
-      {/* 2. Red Pen Correction Overlay View */}
+      {/* 2. Red Pen Overlay View Bertema Warm Cream (Dipanggil dari Komponen RedPenOverlay) */}
       {overlayData ? (
-        <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 text-white">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 bg-slate-900">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400">
-                Red Pen Evaluation Layer
-              </span>
-              <h2 className="text-sm font-bold text-white"> Tian Zige Corrections</h2>
-            </div>
-            <button
-              onClick={() => router.push(`/feedback/${overlayData.submissionId}`)}
-              className="flex items-center gap-1.5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 shadow-md transition-all active:scale-95"
-            >
-              View Full Report
-              <ArrowRight size={14} />
-            </button>
-          </div>
-
-          {/* Canvas Preview dengan Marker Tinta Merah */}
-          <div className="relative flex-1 overflow-hidden bg-black flex items-center justify-center p-3">
-            <div className="relative max-h-full max-w-full">
-              <img
-                src={overlayData.imageUrl}
-                alt="Worksheet Evaluation"
-                className="max-h-[72vh] w-auto rounded-xl object-contain shadow-2xl border border-white/20"
-              />
-
-              {/* Red Pen Overlay Container */}
-              <div className="absolute inset-0 pointer-events-none rounded-xl border-2 border-rose-500/50 p-3 flex flex-col justify-between">
-                {/* Score Stamp */}
-                <div className="self-end rounded-md bg-rose-600/90 px-3 py-1 text-xs font-bold text-white shadow-lg backdrop-blur-md border border-rose-400">
-                   Graded ({correctCount}/{overlayData.results.length})
-                </div>
-
-                {/* Boxes Kata yang Perlu Diperbaiki */}
-                {incorrectItems.length > 0 && (
-                  <div className="rounded-xl border border-rose-500/60 bg-rose-950/85 p-3.5 backdrop-blur-md shadow-2xl">
-                    <p className="text-[11px] font-bold text-rose-300 uppercase tracking-wider mb-2">
-                      Red Pen Corrections Needed:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {incorrectItems.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 rounded-lg border border-rose-400/60 bg-rose-900/60 px-2.5 py-1 text-rose-100"
-                        >
-                          <span className="font-serif text-lg font-bold text-rose-300">
-                            {item.character_name}
-                          </span>
-                          <span className="text-[10px] text-rose-200">({item.pinyin})</span>
-                          <span className="text-[10px] rounded bg-rose-500/40 px-1.5 py-0.5 font-mono text-rose-200">
-                            ✘ Incorrect
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <RedPenOverlay
+          imageUrl={overlayData.imageUrl}
+          results={overlayData.results}
+          onContinue={() => router.push(`/feedback/${overlayData.submissionId}`)}
+        />
       ) : (
+        /* 3. Live Scanner Viewfinder */
         <WorksheetScanner
           onCapture={handleCapture}
           onClose={() => router.back()}

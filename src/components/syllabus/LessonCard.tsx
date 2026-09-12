@@ -15,7 +15,8 @@ export interface Lesson {
 
 export function LessonCard({ lesson }: { lesson: Lesson }) {
   const router = useRouter()
-  const lessonId = lesson.id || 'week-4'
+  // Mengarahkan ke 'latest' jika lesson.id tidak valid/dummy
+  const lessonId = lesson.id || 'latest'
 
   const handleGoToFeedback = () => {
     router.push(`/feedback/${lessonId}`)

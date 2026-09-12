@@ -15,29 +15,40 @@ export default async function FeedbackPage({ params }: PageProps) {
   const resolvedParams = await params
   const id = resolvedParams?.id
 
-  if (!id) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center p-4">
-        <p className="text-rose-500 font-semibold">Invalid Submission ID</p>
-      </main>
-    )
-  }
-
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-  // 1. Fetch Current Submission
-  const { data: currentSubmission, error: subError } = await supabase
-    .from('submissions')
-    .select('*, character_results(*)')
-    .eq('id', id)
-    .maybeSingle()
+  let currentSubmission: any = null
+  let subError: any = null
 
+  // 1. Fetch Current Submission (Support 'latest' maupun ID spesifik)
+  if (!id || id === 'latest') {
+    const { data, error } = await supabase
+      .from('submissions')
+      .select('*, character_results(*)')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    currentSubmission = data
+    subError = error
+  } else {
+    const { data, error } = await supabase
+      .from('submissions')
+      .select('*, character_results(*)')
+      .eq('id', id)
+      .maybeSingle()
+
+    currentSubmission = data
+    subError = error
+  }
+
+  // Fallback jika submission belum ada atau gagal diproses
   if (subError || !currentSubmission) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center space-y-3 bg-white p-6 rounded-2xl shadow-sm border border-border">
+        <div className="text-center space-y-3 bg-white p-6 rounded-2xl shadow-sm border border-border max-w-[360px]">
           <h2 className="text-lg font-bold text-gray-900">Submission Processing</h2>
           <p className="text-xs text-muted-foreground">
             Data submission sedang diproses atau belum ditemukan.

@@ -14,7 +14,6 @@ export interface EvaluationResult {
   results: EvaluationItem[]
 }
 
-// Perbaikan 1: Ubah EXPECTED_WORDS menjadi array of objects lengkap dengan Pinyin
 export const EXPECTED_WORDS = [
   { char: '操场', pinyin: 'cāo chǎng' },
   { char: '礼堂', pinyin: 'lǐ táng' },
@@ -81,7 +80,6 @@ Return a JSON array for all 3 words evaluating if written correctly or incorrect
     console.error('Failed to parse AI JSON:', e)
   }
 
-  // Perbaikan 3: item.char dan item.pinyin sekarang valid sepenuhnya
   const results: EvaluationItem[] = EXPECTED_WORDS.map((item) => {
     const match = parsed.find(
       (p) => p.word === item.char || p.word?.includes(item.char)
