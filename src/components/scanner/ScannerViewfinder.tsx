@@ -7,8 +7,8 @@ export function ScannerViewfinder() {
         {/* 4 Corner Brackets */}
         <div className="absolute top-0 left-0 size-7 border-t-[3.5px] border-l-[3.5px] border-white" />
         <div className="absolute top-0 right-0 size-7 border-t-[3.5px] border-r-[3.5px] border-white" />
-        <div className="absolute bottom-0 left-0 size-7 border-b-[3.5px] border-l-[3.5px] border-white" />
-        <div className="absolute bottom-0 right-0 size-7 border-b-[3.5px] border-r-[3.5px] border-white" />
+        <div className="absolute bottom-4 left-0 size-7 border-b-[3.5px] border-l-[3.5px] border-white" />
+        <div className="absolute bottom-4 right-0 size-7 border-b-[3.5px] border-r-[3.5px] border-white" />
 
         {/* QR Target Box */}
         <div className="absolute top-[10%] right-[6%] flex h-16 w-20 flex-col items-center justify-center rounded-lg border-2 border-dashed border-emerald-400/80 bg-emerald-950/20 backdrop-blur-2xs">
