@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export interface EvaluationItem {
   word: string
@@ -24,47 +24,28 @@ export async function evaluateWorksheetWithGemini(
     throw new Error('GEMINI_API_KEY environment variable is not defined.')
   }
 
-  const ai = new GoogleGenAI({ apiKey })
-  const base64Image = fileBuffer.toString('base64')
-
-  const prompt = `Compare the handwriting in this Tian Zige grid against the expected spelling list ${JSON.stringify(
-    EXPECTED_WORDS
-  )}. Return a JSON array detailing which words were written correctly or incorrectly.`
-
-  const aiResponse = await ai.models.generateContent({
-    model: 'gemini-1.5-flash-latest',
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          { text: prompt },
-          {
-            inlineData: {
-              mimeType: mimeType || 'image/jpeg',
-              data: base64Image,
-            },
-          },
-        ],
-      },
-    ],
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: Type.ARRAY,
-        items: {
-          type: Type.OBJECT,
-          properties: {
-            word: { type: Type.STRING },
-            is_correct: { type: Type.BOOLEAN },
-            feedback: { type: Type.STRING },
-          },
-          required: ['word', 'is_correct'],
-        },
-      },
-    },
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+    generationConfig: { responseMimeType: 'application/json' },
   })
 
-  const rawText = aiResponse.text || '[]'
+  const base64Image = fileBuffer.toString('base64')
+  const prompt = `Compare the handwriting in this Tian Zige grid against the expected spelling list ${JSON.stringify(
+    EXPECTED_WORDS
+  )}. Return a JSON array detailing which words were written correctly or incorrectly with schema: [{"word": string, "is_correct": boolean, "feedback": string}].`
+
+  const result = await model.generateContent([
+    prompt,
+    {
+      inlineData: {
+        mimeType: mimeType || 'image/jpeg',
+        data: base64Image,
+      },
+    },
+  ])
+
+  const rawText = result.response.text() || '[]'
   const evalResults: EvaluationItem[] = JSON.parse(rawText)
 
   const correctCount = evalResults.filter((r) => r.is_correct).length
