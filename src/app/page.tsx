@@ -1,11 +1,12 @@
 'use client'
-
+import { useState } from 'react'
 import { Camera, CircleCheckBig , BookOpen } from 'lucide-react'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { BottomNav } from '@/components/ui/BottomNav'
 import { CreditCard } from '@/components/dashboard/CreditCard'
 import { StatCard } from '@/components/dashboard/StatCard'
 import { UpcomingCard } from '@/components/dashboard/UpcomingCard'
+import { WorksheetScanner } from '@/components/scanner/WorksheetScanner'
 
 const week = [
   { day: 'Mon', date: '12' },
@@ -22,6 +23,16 @@ const upcomingEvent = {
 }
 
 export default function DashboardPage() {
+  const [showScanner, setShowScanner] = useState(false)
+
+  const handleCapturedImage = (imageBlob: Blob) => {
+    setShowScanner(false)
+    console.log('Captured Image Blob:', imageBlob)
+    const formData = new FormData()
+    formData.append('file', imageBlob, 'worksheet.jpg')
+    
+    // fetch('/api/grade-worksheet', { method: 'POST', body: formData })
+  }
   return (
     <main id="dashboard" className="min-h-screen bg-background text-foreground">
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-background pb-24">
@@ -58,11 +69,19 @@ export default function DashboardPage() {
           <div className="animate-fade-up animate-fade-up-4 mt-8 flex justify-center">
             <button
               id="scan-grade-btn"
+              onClick={() => setShowScanner(true)}
               className="flex items-center gap-2.5 rounded-full bg-primary px-6 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-[0_8px_24px_rgba(51,103,94,0.28)] transition-all hover:shadow-[0_10px_30px_rgba(51,103,94,0.38)] hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+              
             >
               <Camera size={18} strokeWidth={2} />
               Scan &amp; Grade Worksheet
             </button>
+            {showScanner && (
+              <WorksheetScanner
+                onCapture={handleCapturedImage}
+                onClose={() => setShowScanner(false)}
+              />
+            )}
           </div>
         </div>
       </div>
