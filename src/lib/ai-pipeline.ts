@@ -15,7 +15,6 @@ export interface EvaluationResult {
 
 export const EXPECTED_WORDS = ['操场', '礼堂', '老师']
 
-
 export async function evaluateWorksheetWithGemini(
   fileBuffer: Buffer,
   mimeType: string
@@ -33,7 +32,7 @@ export async function evaluateWorksheetWithGemini(
   )}. Return a JSON array detailing which words were written correctly or incorrectly.`
 
   const aiResponse = await ai.models.generateContent({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-1.5-flash-latest',
     contents: [
       {
         role: 'user',
