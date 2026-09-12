@@ -77,21 +77,20 @@ export default async function FeedbackPage({ params }: PageProps) {
     { char: '老师', pinyin: 'lǎo shī' },
   ]
 
-  // Dynamic Matrix Mapping from Real Supabase Data
-  const matrixData: CharacterResult[] = expectedWords.map((item) => ({
-    char: item.char,
-    pinyin: item.pinyin,
-    historyData: hasHistory
-      ? historyData.map((sub: any) => {
-          const match = sub.character_results?.find(
-            (cr: any) => cr.word === item.char
-          )
-          return match?.is_correct ? 'correct' : 'incorrect'
-        })
-      : (currentSubmission.character_results?.map((cr: any) =>
-          cr.word === item.char && cr.is_correct ? 'correct' : 'incorrect'
-        ) || ['incorrect']),
-  }))
+    const matrixData: CharacterResult[] = expectedWords.map((item) => ({
+      char: item.char,
+      pinyin: item.pinyin,
+      historyData: hasHistory
+        ? historyData.map((sub: any) => {
+            const match = sub.character_results?.find(
+              (cr: any) => cr.word === item.char
+            )
+            return match?.is_correct ? 'correct' : 'incorrect'
+          })
+        : (currentSubmission.character_results?.map((cr: any) =>
+            cr.word === item.char && cr.is_correct ? 'correct' : 'incorrect'
+          ) || ['correct']),
+    }))
 
   const charResults = currentSubmission.character_results || []
   const missedCount = charResults.filter((cr: any) => !cr.is_correct).length
