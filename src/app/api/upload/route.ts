@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     await supabase.from('character_results').insert(charRecords)
 
     // 5. Update Submission Record menjadi Completed
-    const { data: updatedSubmission, error: updateError } = await supabase
+    const { data: updatedSubmissions, error: updateError } = await supabase
       .from('submissions')
       .update({
         total_score: aiEvaluation.correctCount,
@@ -96,7 +96,6 @@ export async function POST(request: Request) {
       })
       .eq('id', submission.id)
       .select()
-      .single()
 
     if (updateError) {
       return NextResponse.json(
@@ -104,6 +103,8 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
+
+    const updatedSubmission = updatedSubmissions?.[0] || submission
 
     return NextResponse.json({
       message: 'Worksheet evaluated successfully',
