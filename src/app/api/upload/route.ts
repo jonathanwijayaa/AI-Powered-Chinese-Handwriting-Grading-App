@@ -5,24 +5,24 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || !supabaseAnonKey) {
       return NextResponse.json(
-        { error: 'Supabase environment variables are missing in server environment.' },
+        { error: 'Environment variables Supabase belum diset.' },
         { status: 500 }
       )
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const studentId = (formData.get('studentId') as string) || 'student_lucas_p2'
 
     if (!file) {
-      return NextResponse.json({ error: 'No image file provided' }, { status: 400 })
+      return NextResponse.json({ error: 'File gambar tidak ditemukan' }, { status: 400 })
     }
 
     const fileExt = file.name.split('.').pop() || 'jpg'
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       })
 
     if (storageError) {
-      console.error('SUPABASE STORAGE ERROR:', storageError)
+      console.error('STORAGE ERROR:', storageError)
       return NextResponse.json(
         { error: `Storage Error: ${storageError.message}` },
         { status: 500 }
@@ -51,7 +51,6 @@ export async function POST(request: Request) {
       .getPublicUrl(fileName)
 
     const imageUrl = publicUrlData.publicUrl
-
     const { data: submission, error: dbError } = await supabase
       .from('submissions')
       .insert([
@@ -66,7 +65,7 @@ export async function POST(request: Request) {
       .single()
 
     if (dbError) {
-      console.error('SUPABASE DATABASE ERROR:', dbError)
+      console.error('DATABASE ERROR:', dbError)
       return NextResponse.json(
         { error: `Database Error: ${dbError.message}` },
         { status: 500 }
@@ -79,7 +78,7 @@ export async function POST(request: Request) {
       imageUrl: submission.image_url,
     })
   } catch (err: any) {
-    console.error('SERVER API UPLOAD CRASH:', err)
+    console.error('API CRASH LOG:', err)
     return NextResponse.json(
       { error: err.message || 'Internal server error' },
       { status: 500 }
