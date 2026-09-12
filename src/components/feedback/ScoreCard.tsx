@@ -13,7 +13,7 @@ export function ScoreCard({
   date,
   missedCount,
 }: ScoreCardProps) {
-  const isPerfect = missedCount === 0 || percentage >= 100
+  const isPerfect = missedCount === 0
 
   const circleColorClass = isPerfect
     ? 'border-emerald-500 text-emerald-600'
@@ -37,7 +37,9 @@ export function ScoreCard({
         </h2>
         <p className="text-xs text-muted-foreground">{date}</p>
         <p className={`text-xs ${missedTextClass}`}>
-          {missedCount === 0 ? '0 characters missed! Excellent' : `${missedCount} characters missed`}
+          {missedCount === 0
+            ? '0 characters missed! Excellent'
+            : `${missedCount} character${missedCount > 1 ? 's' : ''} missed`}
         </p>
       </div>
     </div>

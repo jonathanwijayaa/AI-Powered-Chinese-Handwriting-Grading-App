@@ -78,23 +78,33 @@ export default async function FeedbackPage({ params }: PageProps) {
   ]
 
     const matrixData: CharacterResult[] = expectedWords.map((item) => ({
-      char: item.char,
-      pinyin: item.pinyin,
-      historyData: hasHistory
-        ? historyData.map((sub: any) => {
-            const match = sub.character_results?.find(
-              (cr: any) => cr.word === item.char
-            )
-            return match?.is_correct ? 'correct' : 'incorrect'
-          })
-        : (currentSubmission.character_results?.map((cr: any) =>
-            cr.word === item.char && cr.is_correct ? 'correct' : 'incorrect'
-          ) || ['correct']),
-    }))
+    char: item.char,
+    pinyin: item.pinyin,
+    historyData: hasHistory
+      ? historyData.map((sub: any) => {
+          const match = sub.character_results?.find(
+            (cr: any) => cr.character_name === item.char
+          )
+
+          return match?.status === 'correct' ? 'correct' : 'incorrect'
+        })
+      : (currentSubmission.character_results?.map((cr: any) =>
+          cr.character_name === item.char && cr.status === 'correct'
+            ? 'correct'
+            : 'incorrect'
+        ) || ['incorrect']),
+  }))
 
   const charResults = currentSubmission.character_results || []
-  const missedCount = charResults.filter((cr: any) => !cr.is_correct).length
+  const missedCount = charResults.filter(
+    (cr: any) => cr.status !== 'correct'
+  ).length
+  const actualScore =
+    charResults.length > 0
+      ? charResults.filter((cr: any) => cr.status === 'correct').length
+      : currentSubmission.total_score ?? 0
 
+  const actualPercentage = Math.round((actualScore / (currentSubmission.max_score || 3)) * 100)
   const formattedDate = currentSubmission.created_at
     ? `Graded on ${new Date(currentSubmission.created_at).toLocaleDateString('en-US', {
         month: 'short',
@@ -128,9 +138,9 @@ export default async function FeedbackPage({ params }: PageProps) {
 
         {/* 1. Score Overview Header */}
         <ScoreCard
-          score={currentSubmission.total_score ?? 0}
-          maxScore={currentSubmission.max_score ?? 3}
-          percentage={currentSubmission.percentage ?? 0}
+          score={actualScore}
+          maxScore={currentSubmission.max_score || 3}
+          percentage={actualPercentage}
           date={formattedDate}
           missedCount={missedCount}
         />
